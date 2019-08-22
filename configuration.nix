@@ -80,6 +80,7 @@
     ### Instant-Messengers
     tdesktop
     telegram-cli
+    discord
 
     ### Sniffers
     wireshark
