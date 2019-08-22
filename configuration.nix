@@ -10,12 +10,18 @@
       ./hardware-configuration.nix
     ];
 
-  # Use the GRUB 2 boot loader.
+  # Use the systemd-boot EFI boot loader.
   boot = { 
     kernelModules = [ "kvm-intel" ];
     extraModulePackages = [ ];
     initrd = { 
       checkJournalingFS = true;
+      luks = {
+        devices = [
+          { name = "root";
+            device = "/dev/disk/by-uuid/56a2f9dd-bdfb-4f01-8cdf-a997d01b4090";
+            preLVM = true;}
+        ];
       };
       kernelModules = [ "dm-snapshot" ];
       availableKernelModules = [ "xhci_pci" "ahci" "usb_storage" "sd_mod" "sdhci_pci" ];
@@ -29,7 +35,6 @@
       efi.canTouchEfiVariables = true;
     };
   };
-
   networking = {
    enableIPv6 = true;
    hostName = "xana"; # Define your hostname.
