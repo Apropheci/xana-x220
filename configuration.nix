@@ -35,6 +35,7 @@
       efi.canTouchEfiVariables = true;
     };
   };
+  
   networking = {
    enableIPv6 = true;
    hostName = "xana"; # Define your hostname.
