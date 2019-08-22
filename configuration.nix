@@ -13,12 +13,34 @@
   # Use the GRUB 2 boot loader.
   boot.loader.systemd-boot.enable = true;
 
-  networking.hostName = "xana"; # Define your hostname.
-  networking.networkmanager.enable = true;  # Enables wireless
-
-  # Configure network proxy if necessary
-  # networking.proxy.default = "http://user:password@proxy:port/";
-  # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
+  networking = {
+   enableIPv6 = true;
+   hostName = "xana"; # Define your hostname.
+   networkmanager = {
+      enable = true;
+      wifi = {
+        powersave = true;
+        scanRandMacAddress = true;
+      };
+    };
+    firewall.enable = false;
+   };
+   
+   
+  security = {
+    sudo.enable = true;
+    apparmor.enable = true;
+    audit.enable = true;
+    auditd.enable = true;
+    dhparams = {
+      enable = true;
+      stateful = true;
+    };
+    hideProcessInformation = true;
+    polkit.enable = true;
+    rngd.enable = true;
+  };
+   
 
   # Select internationalisation properties.
   i18n = {
@@ -33,55 +55,265 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-    wget vim
-    wget firefox
+    # Applications
+    ## Audio
+    caudec
+    mpc_cli
+    ncmpcpp
+
+    ## Editor
+    android-studio
+    neovim
+
+    ## Graphics
+    feh
+
+    ## Misc
+    calcurse
+    zathura
+
+    ## Networking
+    ### Browsers
+    brave
+    firefox
+
+    ### Instant-Messengers
+    tdesktop
+    telegram-cli
+
+    ### Sniffers
+    wireshark
+
+    ## Office
+    libreoffice
+
+    ## Version-Management
+    ### Git-and-Tools
+    git
+
+    ## Video
+    mpv
+    obs-studio
+
+    # Build-Support
+    ## Binutils-Wrapper
+    binutils
+
+    ## CC-Wrapper
+    clang
+    gcc
+
+    ## Trivial-Builder
+    texlive.combined.scheme-full
+
+    # Development
+    ## Compilers
+    chez
+    gforth
+    ghc
+    llvm
+    openjdk
+    racket
+
+    ## Haskell-Modules
+    ### Hackage-Packages
+    haskellPackages.cabal-install
+    haskellPackages.ghcid
+    haskellPackages.hoogle
+    haskellPackages.pandoc
+    haskellPackages.stack
+
+    ## Interpreters
+    guile
+    python37Full
+
+    ## Libraries
+    libnotify
+
+    ## Tools
+    ### Misc
+    dialog
+    patchelf
+
+    ## Web
+    csslint
+
+    # Misc
+    ## Emulators
+    wine
+
+    # OS-Specific
+    ## Linux
+    iotop
+    powertop
+    psmisc
+    linuxPackages.wireguard
+
+    # Tools
+    ## Archivers
+    unrar
+    unzip
+    zip
+
+    ## Filesystems
+    android-file-transfer
+
+    ## Graphics
+    pywal
+    escrotum
+
+    ## Misc
+    neofetch
+    tldr
+    tmpwatch
+    youtube-dl
+
+    ## Networking
+    traceroute
+    wget
+    whois
+    wireguard-tools
+
+    ## Package-Management
+    dpkg
+    nix-index
+
+    ## Security
+    nmap
+    gnupg
+    pass
+    passff-host
+
+    ## System
+    htop
+    lshw
+    ps_mem
+    tree
+
+    ## X11
+    arandr
   ];
+
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
-  # programs.mtr.enable = true;
-  # programs.gnupg.agent = { enable = true; enableSSHSupport = true; };
+  programs = {
+    bash.enableCompletion = true;
+    command-not-found = {
+      enable = true;
+      dbPath = "/nix/var/nix/profiles/per-user/root/channels/nixos/programs.sqlite";
+    };
+    mtr.enable = true;
+    gnupg.agent = { 
+      enable = true;
+      enableBrowserSocket = true;
+      enableSSHSupport = true;
+    };
+  };
 
-  # List services that you want to enable:
 
-  # Enable the OpenSSH daemon.
-  # services.openssh.enable = true;
+  services = {
+    openssh = {
+      enable = true;
+      ports = [ 22 ];
+      permitRootLogin = "no";
+      passwordAuthentication = false;
+      allowSFTP = true;
+    };
+    cron = {
+      enable = true;
+      systemCronJobs = [
+        "0 0 1 * *     root     tmpwatch -maf 240 /tmp"
+      ];
+    };
+    upower = {
+      enable = true;
+      package = pkgs.upower;
+    };
+    nixosManual.showManual = true;
+    printing.enable = true;
+    fprintd.enable = true;
+    xserver = {
+      enable = true;
+      layout = "us";
+      startDbusSession = true;
+      terminateOnReset = true;
+      libinput = {
+        enable = true;
+        tapping = false;
+      };
+      synaptics.enable = false;
+      desktopManager = {
+        xterm.enable = false;
+        plasma5.enable = true;
+      };
+      displayManager.sddm.enable = true;
+    };
+    pcscd.enable = true;
+    udev.packages = with pkgs; [
+      android-udev-rules
+    ];
+  };
 
-  # Open ports in the firewall.
-  # networking.firewall.allowedTCPPorts = [ ... ];
-  # networking.firewall.allowedUDPPorts = [ ... ];
-  # Or disable the firewall altogether.
-  # networking.firewall.enable = false;
-
-  # Enable CUPS to print documents.
-  # services.printing.enable = true;
-
-  # Enable sound.
-  sound.enable = true;
-  hardware.pulseaudio.enable = true;
-
-  # Enable the X11 windowing system.
-  services.xserver.enable = true;
-  services.xserver.layout = "us";
-  services.xserver.xkbOptions = "eurosign:e";
-
-  # Enable touchpad support.
-  services.xserver.libinput.enable = true;
-
-  # Enable the KDE Desktop Environment.
-  services.xserver.displayManager.sddm.enable = true;
-  services.xserver.desktopManager.plasma5.enable = true;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
-  users.users.aprophecy = {
-    isNormalUser = true;
-    extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
+  users = {
+    defaultUserShell = pkgs.zsh;
+    enforceIdUniqueness = true;
+    mutableUsers = true;
+    extraUsers.aprophecy = {
+      description = "Jessie";
+      createHome = true;
+      home = "/home/aprophecy";
+      isNormalUser = true;
+      extraGroups = [
+        "wheel" "disk" "audio" "video"
+        "networkmanager" "systemd-journal"
+        "libvirtd"
+      ];
+      shell = pkgs.zsh;
+      packages = with pkgs; [
+        discord
+      ];
+    };
+  };
+
+  nix = {
+    checkConfig = true;
+    gc = {
+      automatic = true;
+      dates = "3:00";
+    };
+    optimise = {
+      automatic = true;
+      dates = [ "3:30" ];
+    };
+    maxJobs = lib.mkDefault 4;
+    readOnlyStore = true;
+    requireSignedBinaryCaches = true;
+    useSandbox = true;
+  };
+
+  nixpkgs.config = {
+    allowUnfree = true;
+    allowBroken = false;
+  };
+
+  powerManagement = {
+    enable = true;
+    cpuFreqGovernor = lib.mkDefault "powersave";
+    powertop.enable = true;
   };
 
   # This value determines the NixOS release with which your system is to be
   # compatible, in order to avoid breaking some software such as database
   # servers. You should change this only after NixOS release notes say you
   # should.
-  system.stateVersion = "19.03"; # Did you read the comment?
-
+  system = {
+    stateVersion = "19.03"; # Did you read the comment?
+    autoUpgrade = {
+      enable = true;
+      channel = "https://nixos.org/channels/nixos-19.03/";
+    };
+  };
 }
