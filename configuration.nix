@@ -11,7 +11,47 @@
     ];
 
   # Use the GRUB 2 boot loader.
-  boot.loader.systemd-boot.enable = true;
+  boot = { 
+    kernelModules = [ "kvm-intel" ];
+    extraModulePackages = [ ];
+    initrd = { 
+      checkJournalingFS = true;
+      luks = {
+        devices = [
+          { name = "root";
+            device = "/dev/disk/by-uuid/56a2f9dd-bdfb-4f01-8cdf-a997d01b4090";
+            preLVM = true;}
+        ];
+      };
+      kernelModules = [ "dm-snapshot" ];
+      availableKernelModules = [ "xhci_pci" "ahci" "usb_storage" "sd_mod" "sdhci_pci" ];
+    };
+    loader = {
+      systemd-boot = {
+        enable = true;
+        editor = true;
+      };
+      grub.enable = false;
+      efi.canTouchEfiVariables = true;
+    };
+  };
+
+  fileSystems = {
+    "/" = {
+      device = "/dev/disk/by-uuid/8e931801-652b-459e-b856-0310608eb9ac";
+      fsType = "ext4";
+      options = [ "noatime" "nodiratime" "discard" ];
+    };
+
+    "/boot" = { 
+      device = "/dev/disk/by-uuid/60C8-DC6C";
+      fsType = "vfat";
+    };
+  };
+
+  swapDevices = [
+    { device = "/dev/disk/by-uuid/65bf761a-1386-4330-bcff-889d3f8ae604"; }
+  ];
 
   networking = {
    enableIPv6 = true;
