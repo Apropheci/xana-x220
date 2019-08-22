@@ -16,13 +16,6 @@
     extraModulePackages = [ ];
     initrd = { 
       checkJournalingFS = true;
-      luks = {
-        devices = [
-          { name = "root";
-            device = "/dev/disk/by-uuid/56a2f9dd-bdfb-4f01-8cdf-a997d01b4090";
-            preLVM = true;}
-        ];
-      };
       kernelModules = [ "dm-snapshot" ];
       availableKernelModules = [ "xhci_pci" "ahci" "usb_storage" "sd_mod" "sdhci_pci" ];
     };
