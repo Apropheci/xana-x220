@@ -2,7 +2,7 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, ... }:
+{ config, pkgs, lib,  ... }:
 
 {
   imports =
@@ -10,7 +10,7 @@
       ./hardware-configuration.nix
     ];
 
-  # Use the systemd-boot EFI boot loader.
+  # Use the GRUB 2 boot loader.
   boot = { 
     kernelModules = [ "kvm-intel" ];
     extraModulePackages = [ ];
@@ -28,8 +28,8 @@
       efi.canTouchEfiVariables = true;
     };
   };
-  
-  networking = {
+
+    networking = {
    enableIPv6 = true;
    hostName = "xana"; # Define your hostname.
    networkmanager = {
@@ -41,9 +41,8 @@
     };
     firewall.enable = false;
    };
-   
-   
-  security = {
+
+    security = {
     sudo.enable = true;
     apparmor.enable = true;
     audit.enable = true;
@@ -56,7 +55,10 @@
     polkit.enable = true;
     rngd.enable = true;
   };
-   
+
+  # Configure network proxy if necessary
+  # networking.proxy.default = "http://user:password@proxy:port/";
+  # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
   # Select internationalisation properties.
   i18n = {
@@ -80,7 +82,9 @@
     ## Editor
     android-studio
     neovim
-
+    vim
+    vscode
+   
     ## Graphics
     feh
 
@@ -96,7 +100,6 @@
     ### Instant-Messengers
     tdesktop
     telegram-cli
-    discord
 
     ### Sniffers
     wireshark
@@ -121,7 +124,7 @@
     gcc
 
     ## Trivial-Builder
-    texlive.combined.scheme-full
+    # texlive.combined.scheme-full
 
     # Development
     ## Compilers
@@ -168,9 +171,7 @@
 
     # Tools
     ## Archivers
-    unrar
     unzip
-    zip
 
     ## Filesystems
     android-file-transfer
@@ -211,8 +212,8 @@
     arandr
   ];
 
-
   # Some programs need SUID wrappers, can be configured further or are
+   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   programs = {
     bash.enableCompletion = true;
@@ -228,8 +229,13 @@
     };
   };
 
+  # List services that you want to enable:
 
-  services = {
+  # Enable sound.
+  sound.enable = true;
+  hardware.pulseaudio.enable = true;
+
+    services = {
     openssh = {
       enable = true;
       ports = [ 22 ];
@@ -272,7 +278,6 @@
     ];
   };
 
-
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users = {
     defaultUserShell = pkgs.zsh;
@@ -295,7 +300,12 @@
     };
   };
 
-  nix = {
+    nixpkgs.config = {
+    allowUnfree = true;
+    allowBroken = false;
+  };
+
+    nix = {
     checkConfig = true;
     gc = {
       automatic = true;
@@ -311,18 +321,13 @@
     useSandbox = true;
   };
 
-  nixpkgs.config = {
-    allowUnfree = true;
-    allowBroken = false;
-  };
-
-  powerManagement = {
+    powerManagement = {
     enable = true;
     cpuFreqGovernor = lib.mkDefault "powersave";
     powertop.enable = true;
   };
 
-  # This value determines the NixOS release with which your system is to be
+    # This value determines the NixOS release with which your system is to be
   # compatible, in order to avoid breaking some software such as database
   # servers. You should change this only after NixOS release notes say you
   # should.
